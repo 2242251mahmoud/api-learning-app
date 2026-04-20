@@ -7,42 +7,90 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const tips = [
-  "Every API request has a URL, method, and optional data.",
-  "GET requests fetch data. POST requests send new data.",
-  "JSON is the most common API data format.",
-  "Frontend code usually calls APIs with fetch()."
+let nextId = 4;
+const tasks = [
+  { id: 1, title: "Review API basics", done: false, createdAt: new Date().toISOString() },
+  { id: 2, title: "Build one useful endpoint", done: true, createdAt: new Date().toISOString() },
+  { id: 3, title: "Connect frontend with fetch", done: false, createdAt: new Date().toISOString() }
 ];
 
-app.get("/api/hello", (req, res) => {
-  res.json({
-    message: "Hello from your backend API!",
-    time: new Date().toISOString(),
-    requestMethod: req.method
-  });
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
 });
 
-app.get("/api/tip", (req, res) => {
-  const randomTip = tips[Math.floor(Math.random() * tips.length)];
+app.get("/api/tasks", (req, res) => {
+  const { status } = req.query;
 
-  res.json({
-    tip: randomTip,
-    totalTips: tips.length
-  });
-});
-
-app.post("/api/echo", (req, res) => {
-  const { text } = req.body;
-
-  if (!text || typeof text !== "string") {
-    return res.status(400).json({ error: "Please send text as a string." });
+  if (status === "open") {
+    return res.json(tasks.filter((task) => !task.done));
   }
 
-  return res.json({
-    original: text,
-    uppercased: text.toUpperCase(),
-    length: text.length
-  });
+  if (status === "done") {
+    return res.json(tasks.filter((task) => task.done));
+  }
+
+  return res.json(tasks);
+});
+
+app.post("/api/tasks", (req, res) => {
+  const { title } = req.body;
+
+  if (!title || typeof title !== "string" || !title.trim()) {
+    return res.status(400).json({ error: "Please send a non-empty task title." });
+  }
+
+  const newTask = {
+    id: nextId,
+    title: title.trim(),
+    done: false,
+    createdAt: new Date().toISOString()
+  };
+
+  nextId += 1;
+  tasks.unshift(newTask);
+
+  return res.status(201).json(newTask);
+});
+
+app.patch("/api/tasks/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const { done } = req.body;
+
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ error: "Invalid task id." });
+  }
+
+  if (typeof done !== "boolean") {
+    return res.status(400).json({ error: "Please send done as true or false." });
+  }
+
+  const task = tasks.find((item) => item.id === id);
+
+  if (!task) {
+    return res.status(404).json({ error: "Task not found." });
+  }
+
+  task.done = done;
+
+  return res.json(task);
+});
+
+app.delete("/api/tasks/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ error: "Invalid task id." });
+  }
+
+  const index = tasks.findIndex((item) => item.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Task not found." });
+  }
+
+  tasks.splice(index, 1);
+
+  return res.status(204).send();
 });
 
 app.listen(PORT, () => {
