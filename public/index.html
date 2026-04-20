@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Learning App</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>API Learning App</h1>
+      <p>This page talks to your backend with real API calls.</p>
+
+      <section class="card">
+        <h2>1) GET /api/hello</h2>
+        <button id="helloBtn">Fetch hello</button>
+        <pre id="helloOut">Click the button to call the API.</pre>
+      </section>
+
+      <section class="card">
+        <h2>2) GET /api/tip</h2>
+        <button id="tipBtn">Get random tip</button>
+        <pre id="tipOut">Click to get a random API tip.</pre>
+      </section>
+
+      <section class="card">
+        <h2>3) POST /api/echo</h2>
+        <label for="echoInput">Send text to backend:</label>
+        <input id="echoInput" type="text" placeholder="Type something" />
+        <button id="echoBtn">Send POST request</button>
+        <pre id="echoOut">Your POST response will appear here.</pre>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
